@@ -1,0 +1,239 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<title>Window Panel</title>
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+	<style>
+		body {background-color: #e0e0e0;}
+		
+		header,
+		footer {
+			background-color: #f0f0f0;
+			height: 60px;
+		}
+		
+		footer {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+		}
+		
+		.finder {
+			position: relative;
+		}
+		
+		.filter {
+			background-color: white;
+			left: 0;
+			position: absolute;
+			top: 0;
+			width: 300px;
+		}
+		
+		.filter .filter-content {
+			overflow: hidden;
+			position: relative;
+		}
+		
+		.filter .filter-panels {
+			left: 0;
+			position: absolute;
+			top: 20px; /* Set in js, equal to the height of the nav*/
+			white-space: nowrap;
+		}
+		
+		.filter .filter-panels .filter-panel {
+			background-color: #ccc;
+			display: block;
+			float: left;
+			height: 400px;
+			width: 300px;
+		}
+		
+		.filter .filter-toggle {
+			background-color: #ccc;
+			position: absolute;
+			right: -42px;
+			top: 0;
+			
+		}
+		
+		nav ul {
+			margin: 0;
+			padding: 0;
+			list-style-type: none;
+		}
+		
+		nav ul li {
+			display: inline-block;
+			vertical-align: top;
+		}
+		
+		nav ul li .selected {
+			background-color: #ccc;
+		}
+	</style>
+</head>
+	<body>
+		<header>This is the header.</header>
+		
+		<div class="finder">
+			<div class="filter">
+				<div class="filter-content">
+				
+					<nav>
+						<ul>
+							<li><a href="#panel1">Item 1</a></li>
+							<li><a href="#panel2">Item 2</a></li>
+							<li><a href="#panel3">Item 3</a></li>
+							<li><a href="#panel4">Item 4</a></li>
+							<li><a href="#panel5">Item 5</a></li>
+						</ul>
+					</nav>
+				
+					<div class="filter-panels">
+						<div id="panel0" class="filter-panel">
+							<p>This is the intro panel.</p>
+							<a href="#panel1" class="start-filter">Begin here</a>
+						</div>
+						<div id="panel1" class="filter-panel">
+							<h6>Panel 1</h6>
+							<p>This is panel 1.</p>
+					</div>
+						
+						<div id="panel2" class="filter-panel">
+							<h6>Panel 2</h6>
+							<p>This is panel 2.</p>
+						</div>
+						
+						<div id="panel3" class="filter-panel">
+							<h6>Panel 3</h6>
+							<p>This is panel 3.</p>
+						</div>
+						
+						<div id="panel4" class="filter-panel">
+							<h6>Panel 4</h6>
+							<p>This is panel 4.</p>
+						</div>
+						
+						<div id="panel5" class="filter-panel">
+							<h6>Panel 5</h6>
+							<p>This is panel 5.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<footer>This is the footer.</footer>
+	
+	
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+			
+				// Finder Filter
+				var headerHeight = $('header').height(),
+					footerHeight = $('footer').height(),
+					filterHeight = $(window).height() - (headerHeight + footerHeight);
+
+				// Set the filter height
+				$('.filter, .filter .filter-content').css({'height': filterHeight+'px'});
+				
+				// Insert the toggle
+				$('.filter').append('<a href="#" class="filter-toggle">Toggle</a>').addClass('toggle');
+					
+				$(window).resize(function(){
+					var headerHeight = $('header').height(),
+						footerHeight = $('footer').height(),
+						filterHeight = $(window).height() - (headerHeight + footerHeight);
+						
+					// Re-calculate the filter height
+					$('.filter, .filter .filter-content').css({'height': filterHeight+'px'});
+				});
+				
+				
+				var filterBoxWidth = $('.filter').outerWidth();
+				$('.filter-toggle').click(function(event){
+					var filterBox = $(this).parent();
+										
+					event.preventDefault();
+					
+					if( $(filterBox).hasClass('toggle') ){
+						$(filterBox).removeClass('toggle');
+						
+						$(filterBox).animate({
+							width: '0'
+						}, 'fast');
+					}else{
+						$(filterBox).addClass('toggle');
+						$(filterBox).animate({
+							width: filterBoxWidth+'px'
+						}, 'fast');
+					}
+					
+				});
+				
+				
+				// Set up the panels
+				var panels = $('.filter .filter-content .filter-panels .filter-panel'),
+					numberOfPanels = panels.length,
+					panelWidth = $(panels[0]).outerWidth(),
+					panelsHolderWidth = numberOfPanels * panelWidth;
+				
+				// Set the width of the panel holder
+				$('.filter-panels').css({'width': panelsHolderWidth+'px'});
+				
+				// Set the in-panel browser (Back & Next links)
+				for(var p=0; p<panels.length; p++){
+					var panelTitle = $(panels[p]).find('> h6').text();
+										
+					if( $(panels[p]).index() >= 1 ){
+						$(panels[p]).append('<div class="filter-guide"></div>');
+						
+						// Insert Back link
+						if( $(panels[p]).index() < panels.length && $(panels[p]).index() > 1){
+							var backText = $(panels[p]).prev().find('h6').text(),
+								pID = $(panels[p]).prev().attr('id');
+							$(panels[p]).find('.filter-guide').append('<a href="#'+ pID +'">Back: '+ backText +'</a>');
+						}
+						
+						// Insert Next link
+						if( $(panels[p]).index() < panels.length-1 && $(panels[p]).index() != 0 ){
+							var nextText = $(panels[p]).next().find('h6').text(),
+								pID = $(panels[p]).next().attr('id');
+							$(panels[p]).find('.filter-guide').append('<a href="#'+ pID +'">Next: '+ nextText +'</a>');
+						}
+						
+					}
+					
+				}
+				
+				// Set the click event
+				$('.filter nav ul li a, .start-filter, .filter-guide a').click(function(event){
+					var panelID = this.hash,
+						leftOffset = $(panelID)[0].offsetLeft;
+						
+					event.preventDefault();
+					
+					$('.filter-panels').animate({
+						left: -leftOffset+'px'
+					}, 'fast', function(){
+						var links = $('.filter nav ul li a');
+						
+						for(var i=0; i<links.length; i++){
+							if($(links[i]).attr('href') === panelID){
+								$(links[i]).addClass('selected');
+							}else{
+								$(links[i]).removeClass('selected');
+							}
+						}
+						
+					});
+				});
+				
+			});
+		</script>
+	</body>
+</html>
