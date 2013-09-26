@@ -34,20 +34,37 @@
 		.filter .filter-content {
 			overflow: hidden;
 			position: relative;
+			z-index: 5;
+		}
+		
+		.filter .save-search {
+			background-color: white;
+			position: absolute;
+			right: -300px;
+			top: 20px; 
+			width: 300px;
 		}
 		
 		.filter .filter-panels {
 			left: 0;
 			position: absolute;
-			top: 20px; /* Set in js, equal to the height of the nav*/
+			top: 20px; /* Equal to the height of the nav, excluding the sub-menu*/
 			white-space: nowrap;
+		}
+		
+		.filter .legend {
+			background: #cacaca;
+			bottom: 0;
+			left: 0;
+			position: absolute;
+			width: 100%;
 		}
 		
 		.filter .filter-panels .filter-panel {
 			background-color: #ccc;
 			display: block;
 			float: left;
-			height: 400px;
+			/*height: 400px;*/
 			width: 300px;
 		}
 		
@@ -57,6 +74,11 @@
 			right: -42px;
 			top: 0;
 			
+		}
+		
+		nav {
+			position: relative;
+			z-index: 5;
 		}
 		
 		nav ul {
@@ -73,34 +95,48 @@
 		nav ul li .selected {
 			background-color: #ccc;
 		}
+		
+		nav .sub-menu {
+			text-align: right;
+		}
 	</style>
 </head>
 	<body>
 		<header>This is the header.</header>
 		
 		<div class="finder">
+		
+			<!-- Filter Start -->
 			<div class="filter">
 				<div class="filter-content">
-				
+					<!-- Navigation Start -->
 					<nav>
-						<ul>
+						<ul class="criteria">
 							<li><a href="#panel1">Item 1</a></li>
 							<li><a href="#panel2">Item 2</a></li>
 							<li><a href="#panel3">Item 3</a></li>
 							<li><a href="#panel4">Item 4</a></li>
 							<li><a href="#panel5">Item 5</a></li>
 						</ul>
+						
+						<ul class="sub-menu">
+							<li><a href="#" class="save-search-trigger">Save</a></li>
+							<li><a href="#">New</a></li> <!-- This will reset everything, takes user to the Housing panel -->
+						</ul>
 					</nav>
-				
+					<!-- Navigation End -->
+					
+					<!-- Panels Start -->
 					<div class="filter-panels">
 						<div id="panel0" class="filter-panel">
 							<p>This is the intro panel.</p>
 							<a href="#panel1" class="start-filter">Begin here</a>
 						</div>
+						
 						<div id="panel1" class="filter-panel">
 							<h6>Panel 1</h6>
 							<p>This is panel 1.</p>
-					</div>
+						</div>
 						
 						<div id="panel2" class="filter-panel">
 							<h6>Panel 2</h6>
@@ -122,8 +158,43 @@
 							<p>This is panel 5.</p>
 						</div>
 					</div>
+					<!-- Panels End -->
+					
+					<!-- Legend Start -->
+					<div class="legend">
+						<p>This is the map legend.</p>
+					</div>
+					<!-- Legend End -->
+					
 				</div>
+				
+				<!-- Save Search Start -->
+				<div class="save-search">
+					<form method="post" action="#">
+						<fieldset>
+							<legend>Save Search</legend>
+							<div class="field">
+								<label for="search_name">Title</label>
+								<input type="text" id="search_name" />
+							</div>
+							
+							<div class="field">
+								<label for="search_description">Description <em>(Option)</em></label>
+								<textarea></textarea>
+							</div>
+							
+							<div class="field field-actions">
+								<input type="submit" value="Save Search" />
+								<a href="#" class="cancel-save">Cancel</a>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<!-- Save Search End -->
+				
 			</div>
+			<!-- Filter End -->
+		
 		</div>
 		
 		<footer>This is the footer.</footer>
@@ -163,14 +234,18 @@
 					if( $(filterBox).hasClass('toggle') ){
 						$(filterBox).removeClass('toggle');
 						
-						$(filterBox).animate({
+						$(filterBox).stop().animate({
 							width: '0'
-						}, 'fast');
+						}, 'fast', function(){
+							$('.filter-content').fadeOut('fast');
+						});
 					}else{
 						$(filterBox).addClass('toggle');
-						$(filterBox).animate({
+						$(filterBox).stop().animate({
 							width: filterBoxWidth+'px'
-						}, 'fast');
+						}, 'fast', function(){
+							$('.filter-content').fadeIn('fast');
+						});
 					}
 					
 				});
@@ -182,13 +257,16 @@
 					panelWidth = $(panels[0]).outerWidth(),
 					panelsHolderWidth = numberOfPanels * panelWidth;
 				
+				// Hides the sub-menu on the intro panel
+				$('nav .sub-menu').hide();
+				
 				// Set the width of the panel holder
 				$('.filter-panels').css({'width': panelsHolderWidth+'px'});
 				
 				// Set the in-panel browser (Back & Next links)
 				for(var p=0; p<panels.length; p++){
 					var panelTitle = $(panels[p]).find('> h6').text();
-										
+					
 					if( $(panels[p]).index() >= 1 ){
 						$(panels[p]).append('<div class="filter-guide"></div>');
 						
@@ -211,15 +289,15 @@
 				}
 				
 				// Set the click event
-				$('.filter nav ul li a, .start-filter, .filter-guide a').click(function(event){
+				$('.filter nav .criteria li a, .start-filter, .filter-guide a').click(function(event){
 					var panelID = this.hash,
 						leftOffset = $(panelID)[0].offsetLeft;
 						
 					event.preventDefault();
 					
-					$('.filter-panels').animate({
+					$('.filter-panels').stop().animate({
 						left: -leftOffset+'px'
-					}, 'fast', function(){
+					}, 500, function(){
 						var links = $('.filter nav ul li a');
 						
 						for(var i=0; i<links.length; i++){
@@ -231,8 +309,44 @@
 						}
 						
 					});
+					
+					$('nav .sub-menu').show();
 				});
 				
+				// Save Search
+				$('.save-search').css({'right': '0', 'opacity': '0'}).append('<a href="#" class="close-search">Close</a>');
+				$('nav .save-search-trigger').click(function(event){
+					event.preventDefault();
+					
+					$(this).addClass('selected');
+					$('.save-search').stop().animate({
+						right: '-300px',
+						opacity: '1'
+					}, 500);
+				});
+				
+				$('.cancel-save').click(function(event){
+					var form = $(this).parents('form')[0];
+					closeSearch(event, form);
+				});
+				
+				$('.close-search').click(function(event){
+					var form = $(this).prev()[0];
+					closeSearch(event, form);
+				});
+				
+				function closeSearch(event, form){
+					event.preventDefault();
+					
+					// Hide the save search box
+					$('.save-search').stop().animate({
+						right: '0',
+						opacity: '0'
+					}, 500);
+					
+					// Reset the form
+					form.reset();
+				}
 			});
 		</script>
 	</body>
