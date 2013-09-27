@@ -235,14 +235,14 @@
 						$(filterBox).removeClass('toggle');
 						
 						$(filterBox).stop().animate({
-							width: '0'
+							left: '-'+ filterBoxWidth +'px'
 						}, 'fast', function(){
 							$('.filter-content').fadeOut('fast');
 						});
 					}else{
 						$(filterBox).addClass('toggle');
 						$(filterBox).stop().animate({
-							width: filterBoxWidth+'px'
+							left: '0'
 						}, 'fast', function(){
 							$('.filter-content').fadeIn('fast');
 						});
